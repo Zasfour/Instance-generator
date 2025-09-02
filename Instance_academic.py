@@ -16,10 +16,9 @@ class GridSpec:
     cols: int
     edge_length: float = 1.0
     directed: bool = True
-    make_dual: bool = True  # Dual as the line graph of the directed graph
 
 
-def create_graph(spec: GridSpec) -> Tuple[Dict[Tuple[int, int], str], nx.DiGraph, nx.Graph | None]:
+def create_graph(spec: GridSpec) -> Tuple[Dict[Tuple[int, int], str], nx.DiGraph]:
     """
     Build a directed graph from a 2‑D lattice and return a node id mapping,
     the directed graph, and its (edge‑)dual graph as a line graph.
@@ -37,7 +36,6 @@ def create_graph(spec: GridSpec) -> Tuple[Dict[Tuple[int, int], str], nx.DiGraph
         (coord_to_id, G, dual_G)
         - coord_to_id: maps (row, col) -> node_id as string
         - G: directed graph with 'x','y' node attributes and 'length' edge attribute
-        - dual_G: line graph of G (edge‑dual). None if make_dual=False
     """
     # Base undirected lattice (4‑neighborhood)
     lattice = nx.grid_2d_graph(spec.rows, spec.cols)
@@ -57,9 +55,7 @@ def create_graph(spec: GridSpec) -> Tuple[Dict[Tuple[int, int], str], nx.DiGraph
         G.add_edge(u, v, length=spec.edge_length)
         G.add_edge(v, u, length=spec.edge_length)
 
-    # Edge‑dual via the standard line‑graph construction
-    dual_G = nx.line_graph(G) if spec.make_dual else None
-    return coord_to_id, G, dual_G
+    return coord_to_id, G
 
 
 # Predefined nominal flight templates (start offset, list of node IDs as strings)
@@ -238,7 +234,7 @@ if __name__ == "__main__":
     
     # 1) Build a 9x8 directed grid with unit lengths and its line‑graph dual
     spec = GridSpec(rows=9, cols=8, edge_length=60.0, directed=True, make_dual=True)
-    coord_to_id, G, dual_G = create_graph(spec)
+    coord_to_id, G = create_graph(spec)
 
     # 2) Generate one replication of base flight intentions
     F = generate_flight_intentions(repetitions=1, 
