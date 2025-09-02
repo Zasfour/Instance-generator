@@ -233,7 +233,7 @@ if __name__ == "__main__":
     )
     
     # 1) Build a 9x8 directed grid with unit lengths and its line‑graph dual
-    spec = GridSpec(rows=9, cols=8, edge_length=60.0, directed=True, make_dual=True)
+    spec = GridSpec(rows=9, cols=8, edge_length=60.0, directed=True)
     coord_to_id, G = create_graph(spec)
 
     # 2) Generate one replication of base flight intentions
