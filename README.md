@@ -4,7 +4,7 @@ This module generates academic instances for the urban drone trajectory optimiza
 
 ## Graph Structure
 
-We consider a **Grid-like graph**, where each edge has the same length (see the `GridSpec` function).  
+We consider a **Grid-like graph**, where each arc has the same length (see the `GridSpec` function).  
 The grid defines the spatial layout used to construct feasible horizontal paths for all flights.
 
 ## Common Parameters
