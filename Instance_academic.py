@@ -69,7 +69,7 @@ BASE_FLIGHTS: Dict[str, Tuple[int, List[str]]] = {
 
 
 @dataclass(frozen=True)
-class TimingParamsV2:
+class TimingParams:
     edge_length: float                 # length per edge (consistent units)
     v_min: float                       # min cruise speed
     v_max: float                       # max cruise speed
@@ -91,7 +91,7 @@ def _cumulative_edge_times(num_edges: int, edge_length: float, v: float) -> List
 
 def generate_flight_intentions(
     repetitions: int,
-    timing: TimingParamsV2,
+    timing: TimingParams,
     base_flights: Dict[str, Tuple[int, List[str]]] | None = None,
 ) -> Dict[str, Dict[str, object]]:
     """
@@ -191,7 +191,7 @@ def save_results_as_json(filepath: Path,
 # -----------------------------
 if __name__ == "__main__":
 
-    timing = TimingParamsV2(
+    timing = TimingParams(
         edge_length=60.0,
         v_min=2,
         v_max=10,
