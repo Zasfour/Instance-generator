@@ -21,7 +21,7 @@ These parameters are shared across all flights in the instance.
 
 Each instance is built upon **five reference flights** (see the `BASE_FLIGHTS` object).  
 Each reference flight is characterized by:
-- its **relative departure time** with respect to the first reference flight (denoted `D1`), and  
+- its **relative scheduled take-off time** with respect to the first reference flight (denoted `D1`), and  
 - its **horizontal path** on the grid.
 
 ## Instance Generation
