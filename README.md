@@ -26,7 +26,7 @@ Each reference flight is characterized by:
 
 ## Instance Generation
 
-The generated instances contain \( 5 \times n \) flights, with \( n \in \mathbb{N}^* \).  
+The generated instances contain $5 \times n$ flights, with \( n \in \mathbb{N}^* \).  
 The reference set of five flights is replicated \( n-1 \) times.  
 For each replication, the relative departure times are shifted by \( 60 \times (n-1) \) seconds (see the `generate_flight_intentions` function).
 
