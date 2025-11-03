@@ -58,13 +58,13 @@ def create_graph(spec: GridSpec) -> Tuple[Dict[Tuple[int, int], str], nx.DiGraph
     return coord_to_id, G
 
 
-# Predefined nominal flight templates (start offset, list of node IDs as strings)
+# Predefined flight (scheduled take-off time, horizontal path)
 BASE_FLIGHTS: Dict[str, Tuple[int, List[str]]] = {
-    "D1": (0,  ["6","14","22","21","20","28","36","35","34","42","50","49","48","56","64"]),                # zigzag 1
-    "D2": (7,  ["15","14","13","12","11","10","9","8"]),                                                   # vertical 1
-    "D3": (13, ["5","13","21","29","37","45","53","61","69"]),                                             # horizontal 1
-    "D4": (25, ["23","22","30","38","37","36","44","52","51","50","58","66"]),                             # zigzag 2
-    "D5": (32, ["4","12","20","19","18","26","34","33","32","40","48"]),                                   # zigzag 3
+    "D1": (0,  ["6","14","22","21","20","28","36","35","34","42","50","49","48","56","64"]),              # winding 1
+    "D2": (36,  ["15","14","13","12","11","10","9","8"]),                                                 # southward
+    "D3": (7, ["5","13","21","29","37","45","53","61","69"]),                                             # eastward
+    "D4": (0, ["23","22","30","38","37","36","44","52","51","50","58","66"]),                             # winding 2
+    "D5": (63, ["4","12","20","19","18","26","34","33","32","40","48"]),                                  # winding 3
 }
 
 
@@ -81,14 +81,7 @@ class TimingParamsV2:
 
 
 def _piecewise_offset(rep_index: int) -> int:
-    if rep_index < 3:
-        return rep_index * 115
-    elif rep_index < 6:
-        return rep_index * 100
-    elif rep_index < 9:
-        return rep_index * 85
-    else:
-        return rep_index * 70
+    return rep_index * 60
 
 
 def _cumulative_edge_times(num_edges: int, edge_length: float, v: float) -> List[float]:
@@ -147,38 +140,21 @@ def generate_flight_intentions(
 
 
 def generate_separation_nodes(F_templates: Dict[str, Tuple[int, List[str]]],
-                              rng: random.Random | None = None,
-                              min_sep: int = 16,
-                              max_sep: int = 28,
-                              first_node_value: int = 60) -> Dict[str, int]:
+                              min_sep: int = 16) -> Dict[str, int]:
     """
-    Create a separation‑time requirement per node encountered in the *base* nominal paths.
-
-    Rule used (explicit and reproducible):
-      • For the first node of each nominal path: set separation = `first_node_value`.
-      • For subsequent nodes in that path: draw an integer U[min_sep, max_sep].
-      • If a node appears in multiple paths, keep the first assigned value (no overwrite).
-      • Duplicate nodes within a single path are removed before processing.
-
     Parameters
     ----------
     F_templates : dict
         Base flight templates (not the replicated F). Keys ignored; values are (time, path).
-    rng : random.Random or None
-        Optional RNG to make results reproducible. If None, a new Random() is used.
-    min_sep, max_sep : int
-        Inclusive bounds for random separation values along paths.
-    first_node_value : int
-        Separation value assigned to the first node of each path.
+    min_sep : int
+        Minimum separation time along paths.
 
     Returns
     -------
     dict
         Sep_Nodes mapping node_id (str) -> separation_time (int).
     """
-    if rng is None:
-        rng = random.Random()
-
+    
     Sep_Nodes: Dict[str, int] = {}
 
     for _, (t0, path) in F_templates.items():
@@ -190,17 +166,11 @@ def generate_separation_nodes(F_templates: Dict[str, Tuple[int, List[str]]],
                 seen.add(n)
                 dedup_path.append(n)
 
-        # Draw values for the remaining nodes of this path
         if dedup_path:
-            first = dedup_path[0]
-            if first not in Sep_Nodes:
-                Sep_Nodes[first] = int(first_node_value)
-
-            # For the rest of nodes, assign random values within bounds
-            for node in dedup_path[1:]:
+            for node in dedup_path:
                 if node not in Sep_Nodes:
-                    Sep_Nodes[node] = int(rng.randint(min_sep, max_sep))
-
+                    Sep_Nodes[node] = min_sep
+                    
     return Sep_Nodes
 
 
@@ -242,7 +212,7 @@ if __name__ == "__main__":
                                    base_flights=BASE_FLIGHTS)
 
     # 3) Generate per‑node separation requirements from base templates
-    Sep_Nodes = generate_separation_nodes(BASE_FLIGHTS, rng=None, min_sep=16, max_sep=28, first_node_value=60)
+    Sep_Nodes = generate_separation_nodes(BASE_FLIGHTS, min_sep=28)
 
     # 4) Save to JSON
     out_path = Path("flight_data.json")
