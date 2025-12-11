@@ -193,7 +193,7 @@ if __name__ == "__main__":
 
     timing = TimingParams(
         edge_length=60.0,
-        v_min=2,
+        v_min=4,
         v_max=10,
         ground_delay_max=120.0,
         n_flight_levels=2,
